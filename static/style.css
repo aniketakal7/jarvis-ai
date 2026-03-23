@@ -1,49 +1,47 @@
 body {
-    margin:0;
-    background:#020617;
-    color:white;
-    font-family:sans-serif;
+    background: black;
+    color: white;
+    text-align: center;
+    font-family: Arial;
 }
 
-#bg {
-    position:fixed;
-    width:250px;
-    top:50%;left:50%;
-    transform:translate(-50%,-50%);
-    opacity:0.2;
+.core {
+    width: 120px;
+    height: 120px;
+    background: cyan;
+    border-radius: 50%;
+    margin: 40px auto;
+    box-shadow: 0 0 50px cyan;
+}
+
+.core.listening {
+    box-shadow: 0 0 100px cyan;
+}
+
+.mic {
+    font-size: 30px;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.mic.active {
+    color: cyan;
+    transform: scale(1.2);
 }
 
 #chat {
-    height:85vh;
-    overflow:auto;
-    padding:20px;
-    display:flex;
-    flex-direction:column;
-    backdrop-filter: blur(10px);
+    height: 200px;
+    overflow-y: auto;
+}
+
+.msg {
+    margin: 5px;
 }
 
 .user {
-    align-self:flex-end;
-    background:#2563eb;
-    padding:10px;
-    margin:5px;
-    border-radius:10px;
+    color: lightgreen;
 }
 
 .bot {
-    align-self:flex-start;
-    background:#1e293b;
-    padding:10px;
-    margin:5px;
-    border-radius:10px;
-}
-
-#input-area {
-    display:flex;
-    padding:10px;
-}
-
-input {
-    flex:1;
-    padding:10px;
+    color: cyan;
 }
