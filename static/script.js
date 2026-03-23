@@ -1,75 +1,87 @@
-function typeEffect(text, element) {
-    let i = 0;
-    function typing() {
-        if (i < text.length) {
-            element.innerHTML += text.charAt(i);
-            i++;
-            setTimeout(typing, 15);
-        }
-    }
-    typing();
+let recognition;
+let listening = false;
+
+function setStatus(t){
+    document.getElementById("status").innerText = t;
 }
 
-function add(msg, cls){
-    let d=document.createElement("div");
-    d.className=cls;
-    document.getElementById("chat").appendChild(d);
+function setListening(on){
+    let mic = document.querySelector(".mic");
+    let core = document.querySelector(".core");
 
-    if(cls==="bot"){
-        typeEffect(msg,d);
+    if(on){
+        mic.classList.add("active");
+        core.classList.add("listening");
     } else {
-        d.innerText=msg;
+        mic.classList.remove("active");
+        core.classList.remove("listening");
     }
 }
 
-function showThinking(){
-    let d=document.createElement("div");
-    d.className="bot";
-    d.id="thinking";
-    d.innerText="Jarvis thinking...";
-    document.getElementById("chat").appendChild(d);
+function speak(text){
+    let s = new SpeechSynthesisUtterance(text);
+    setStatus("🔊 Speaking...");
+    speechSynthesis.speak(s);
+    s.onend = ()=> startWakeWord(); // go back to wake mode
 }
 
-function removeThinking(){
-    let t=document.getElementById("thinking");
-    if(t) t.remove();
-}
+async function send(q){
+    setStatus("Processing...");
 
-function send(){
-    let q=document.getElementById("q").value;
-    add(q,"user");
-
-    showThinking();
-
-    fetch("/ask",{
+    let res = await fetch("/ask",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({q:q})
-    })
-    .then(r=>r.json())
-    .then(d=>{
-        removeThinking();
-        add(d.answer,"bot");
+        body: JSON.stringify({q})
     });
 
-    document.getElementById("q").value="";
+    let data = await res.json();
+
+    document.getElementById("chat").innerHTML += `<div class='msg user'>${q}</div>`;
+    document.getElementById("chat").innerHTML += `<div class='msg bot'>${data.answer}</div>`;
+
+    speak(data.answer);
 }
 
-// 🎙️ Auto listening
-function startListening(){
-    let r=new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    r.continuous=true;
+function startWakeWord(){
+    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+    recognition.continuous = true;
 
-    r.onresult=function(e){
-        let text=e.results[e.results.length-1][0].transcript.toLowerCase();
+    setStatus("💤 Waiting for 'Jarvis'...");
+    setListening(false);
+
+    recognition.onresult = (e)=>{
+        let text = e.results[e.results.length - 1][0].transcript.toLowerCase();
 
         if(text.includes("jarvis")){
-            document.getElementById("q").value=text.replace("jarvis","").trim();
-            send();
+            recognition.stop();
+            startListening();
         }
     };
 
-    r.start();
+    recognition.start();
 }
 
-startListening();
+function startListening(){
+    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+
+    setListening(true);
+    setStatus("🎤 Listening...");
+
+    recognition.onresult = (e)=>{
+        let text = e.results[0][0].transcript;
+        send(text);
+    };
+
+    recognition.onend = ()=>{
+        setListening(false);
+    };
+
+    recognition.start();
+}
+
+// START AUTOMATICALLY
+window.onload = () => {
+    startWakeWord();
+};
