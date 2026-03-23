@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<img id="bg" src="{{ url_for('static', filename='bg.gif') }}">
+
+<div id="chat"></div>
+
+<div id="input-area">
+<input id="q" placeholder="Ask Jarvis...">
+<button onclick="send()">➤</button>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
